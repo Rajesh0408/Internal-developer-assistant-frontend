@@ -1,0 +1,52 @@
+<template>
+  <v-app-bar app class="glass-nav px-4" flat elevation="0">
+    <v-toolbar-title class="font-weight-bold">
+      <span class="text-gradient" style="font-size: 1.4rem;">Internal Developer</span><span style="opacity: 0.9;"> Assistant</span>
+    </v-toolbar-title>
+
+    <v-spacer />
+
+    <!-- If Logged In -->
+    <template v-if="isLoggedIn">
+      <v-btn variant="text" to="/dashboard" class="custom-btn mx-1" rounded="xl">Dashboard</v-btn>
+      <v-btn variant="text" to="/questions" class="custom-btn mx-1" rounded="xl">Questions</v-btn>
+      <v-btn v-if="isAdmin" variant="text" to="/admin" class="custom-btn mx-1 text-warning" rounded="xl">
+        <v-icon start size="small">mdi-shield-check</v-icon> Admin
+      </v-btn>
+      <v-btn variant="outlined" @click="logout" color="error" class="custom-btn ml-4" rounded="xl">Logout</v-btn>
+    </template>
+
+    <!-- If NOT Logged In -->
+    <template v-else>
+      <v-btn variant="text" to="/login" class="custom-btn" rounded="xl">Login</v-btn>
+      <v-btn variant="flat" color="primary" to="/register" class="custom-btn ml-2" rounded="xl">Register</v-btn>
+    </template>
+
+  </v-app-bar>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { authStore } from '../stores/auth'
+
+const router = useRouter()
+
+// ✅ Check if logged in
+const isLoggedIn = computed(() => !!authStore.token)
+
+const isAdmin = computed(() => {
+  if (!authStore.token) return false
+  try {
+    const payload = JSON.parse(atob(authStore.token.split('.')[1]))
+    return payload.role === 'admin'
+  } catch (e) {
+    return false
+  }
+})
+
+const logout = () => {
+  authStore.logout()
+  router.push('/login')
+}
+</script>
