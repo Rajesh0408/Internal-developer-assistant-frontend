@@ -1,7 +1,7 @@
 <template>
-  <v-app-bar app class="glass-nav px-4" flat elevation="0">
-    <v-toolbar-title class="font-weight-bold">
-      <span class="text-gradient" style="font-size: 1.4rem;">Internal Developer</span><span style="opacity: 0.9;"> Assistant</span>
+  <v-app-bar app class="px-4" elevation="1" color="surface">
+    <v-toolbar-title class="font-weight-bold text-primary">
+      Internal Developer Assistant
     </v-toolbar-title>
 
     <v-spacer />
@@ -10,6 +10,7 @@
     <template v-if="isLoggedIn">
       <v-btn variant="text" to="/dashboard" class="custom-btn mx-1" rounded="xl">Dashboard</v-btn>
       <v-btn variant="text" to="/questions" class="custom-btn mx-1" rounded="xl">Questions</v-btn>
+      <v-btn variant="text" to="/profile" class="custom-btn mx-1" rounded="xl">Profile</v-btn>
       <v-btn v-if="isAdmin" variant="text" to="/admin" class="custom-btn mx-1 text-warning" rounded="xl">
         <v-icon start size="small">mdi-shield-check</v-icon> Admin
       </v-btn>
