@@ -133,20 +133,14 @@ const decodeToken = () => {
 
 const fetchStats = async () => {
   try {
-    const questionsRes = await api.get('/api/questions')
-    totalQuestions.value = questionsRes.data.length
-
-    let answerCount = 0
-    questionsRes.data.forEach(q => {
-      if (q.answers) {
-        answerCount += q.answers.length
-      }
-    })
-    totalAnswers.value = answerCount
+    const statsRes = await api.get('/api/users/me/stats')
+    totalQuestions.value = statsRes.data.totalQuestions
+    totalAnswers.value = statsRes.data.totalAnswers
   } catch (e) {
     console.error('Error fetching stats', e)
   }
 }
+
 
 const fetchNotifications = async () => {
   try {
