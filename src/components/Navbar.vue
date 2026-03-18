@@ -24,6 +24,7 @@
     <template v-if="isLoggedIn">
       <v-btn variant="text" to="/dashboard" class="custom-btn mx-1" rounded="xl">Dashboard</v-btn>
       <v-btn variant="text" to="/questions" class="custom-btn mx-1" rounded="xl">Questions</v-btn>
+      <v-btn variant="text" to="/knowledge" class="custom-btn mx-1" rounded="xl">Knowledge</v-btn>
       <v-btn variant="text" to="/profile" class="custom-btn mx-1" rounded="xl">Profile</v-btn>
       <v-btn v-if="isAdmin" variant="text" to="/admin" class="custom-btn mx-1 text-warning" rounded="xl">
         <v-icon start size="small">mdi-shield-check</v-icon> Admin

@@ -76,6 +76,51 @@
           <v-icon size="48" color="success" class="opacity-80">mdi-check-decagram-outline</v-icon>
         </v-card>
 
+        <!-- Recent Documents -->
+        <v-card class="pa-6 mb-8" elevation="1">
+          <v-card-title class="text-h6 font-weight-bold px-0 mb-4 d-flex align-center">
+            <v-icon start color="primary" class="mr-3">mdi-file-document-multiple-outline</v-icon>
+            Latest Docs
+            <v-spacer></v-spacer>
+            <v-btn variant="text" size="small" color="primary" to="/knowledge">View All</v-btn>
+          </v-card-title>
+          
+          <v-divider class="mb-4 opacity-20" />
+
+          <v-alert
+            v-if="recentDocuments.length === 0"
+            color="info"
+            variant="tonal"
+            icon="mdi-information-outline"
+            class="mt-4 border-radius-8"
+          >
+            No documents available.
+          </v-alert>
+
+          <v-list v-else bg-color="transparent" class="px-0">
+            <v-list-item
+              v-for="doc in recentDocuments"
+              :key="doc.id"
+              class="mb-3 rounded-lg py-3 notification-item"
+              :href="`http://localhost:3333/uploads/${doc.filePath}?view=true`"
+              target="_blank"
+            >
+              <template v-slot:prepend>
+                <v-avatar color="primary" variant="tonal" class="mr-3" size="36">
+                  <v-icon size="small">mdi-file-pdf-box</v-icon>
+                </v-avatar>
+              </template>
+              
+              <v-list-item-title class="font-weight-medium text-body-2 text-truncate">
+                {{ doc.title }}
+              </v-list-item-title>
+              <v-list-item-subtitle class="text-caption mt-1">
+                {{ new Date(doc.createdAt).toLocaleDateString() }}
+              </v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
+        </v-card>
+
         <!-- Notifications -->
         <v-card class="pa-6" elevation="1">
           <v-card-title class="text-h6 font-weight-bold px-0 mb-4 d-flex align-center">
@@ -134,6 +179,7 @@ const userRole = ref('')
 const totalQuestions = ref(0)
 const totalAnswers = ref(0)
 const notifications = ref([])
+const recentDocuments = ref([])
 
 const activeTab = ref('following')
 const feedQuestions = ref([])
@@ -172,6 +218,15 @@ const fetchNotifications = async () => {
     notifications.value = res.data.slice(0, 5)
   } catch (e) {
     console.error('Error fetching notifications', e)
+  }
+}
+
+const fetchRecentDocuments = async () => {
+  try {
+    const res = await api.get('/api/documents')
+    recentDocuments.value = res.data.slice(0, 3)
+  } catch (e) {
+    console.error('Error fetching recent documents', e)
   }
 }
 
@@ -218,6 +273,7 @@ onMounted(() => {
   decodeToken()
   fetchStats()
   fetchNotifications()
+  fetchRecentDocuments()
   fetchFeed()
 })
 </script>

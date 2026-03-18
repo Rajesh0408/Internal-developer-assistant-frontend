@@ -55,6 +55,31 @@
       </v-row>
     </v-card>
 
+    <!-- Matched Documents -->
+    <v-card class="mb-8 pa-4 glass-card" elevation="0" v-if="searchedDocuments.length > 0">
+      <h3 class="text-h6 font-weight-bold mb-4">Matched Documents</h3>
+      <v-row>
+        <v-col v-for="doc in searchedDocuments" :key="doc.id" cols="12" sm="6" md="4">
+          <v-card class="bg-surface-light px-4 py-3 rounded-lg d-flex align-center" elevation="0">
+            <v-avatar color="primary-lighten-4" class="mr-3 text-primary">
+              <v-icon>mdi-file-document</v-icon>
+            </v-avatar>
+            <div class="flex-grow-1" style="min-width: 0;">
+              <h4 class="text-subtitle-1 font-weight-bold text-primary text-decoration-none d-block text-truncate">
+                {{ doc.title }}
+              </h4>
+            </div>
+            <v-btn :href="`http://localhost:3333/uploads/${doc.filePath}?view=true`" target="_blank" icon variant="text" color="secondary" title="View Document">
+              <v-icon>mdi-eye</v-icon>
+            </v-btn>
+            <v-btn :href="`http://localhost:3333/uploads/${doc.filePath}`" target="_blank" icon variant="text" color="primary" title="Download Document">
+              <v-icon>mdi-download</v-icon>
+            </v-btn>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-card>
+
     <!-- Question List -->
     <v-row>
       <v-col
@@ -155,6 +180,7 @@ const proof = ref(null)
 
 const searchKeyword = ref('')
 const searchedUsers = ref([])
+const searchedDocuments = ref([])
 
 // Fetch all questions
 const fetchQuestions = async () => {
@@ -162,6 +188,7 @@ const fetchQuestions = async () => {
     const res = await api.get('/api/questions')
     questions.value = res.data.data || res.data
     searchedUsers.value = []
+    searchedDocuments.value = []
   } catch (e) {
     console.error('Error fetching questions', e)
   }
@@ -180,6 +207,7 @@ const searchQuestions = async () => {
     )
     questions.value = res.data.questions?.data || res.data.questions || []
     searchedUsers.value = res.data.users || []
+    searchedDocuments.value = res.data.documents || []
   } catch {
     alert('Search failed')
   }
