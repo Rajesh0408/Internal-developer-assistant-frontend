@@ -1,8 +1,22 @@
 <template>
   <v-app-bar app class="px-4" elevation="1" color="surface">
-    <v-toolbar-title class="font-weight-bold text-primary">
+    <v-toolbar-title class="font-weight-bold text-primary mr-4" style="min-width: 250px;">
       Internal Developer Assistant
     </v-toolbar-title>
+
+    <v-text-field
+      v-if="isLoggedIn"
+      v-model="searchQuery"
+      placeholder="Search questions or users..."
+      prepend-inner-icon="mdi-magnify"
+      density="compact"
+      variant="solo-filled"
+      flat
+      hide-details
+      class="mx-4 bg-surface rounded-xl flex-grow-1"
+      style="max-width: 500px;"
+      @keyup.enter="performSearch"
+    ></v-text-field>
 
     <v-spacer />
 
@@ -27,11 +41,18 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { authStore } from '../stores/auth'
 
 const router = useRouter()
+const searchQuery = ref('')
+
+const performSearch = () => {
+  if (searchQuery.value.trim()) {
+    router.push(`/questions?keyword=${encodeURIComponent(searchQuery.value.trim())}`)
+  }
+}
 
 // ✅ Check if logged in
 const isLoggedIn = computed(() => !!authStore.token)

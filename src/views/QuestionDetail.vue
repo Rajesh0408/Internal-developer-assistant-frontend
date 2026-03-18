@@ -11,6 +11,16 @@
         <h1 class="text-h4 font-weight-bold flex-grow-1" style="line-height: 1.3;">
           {{ question.title }}
         </h1>
+        <v-btn 
+          v-if="currentUserRole === 'admin' || currentUserId === question.userId"
+          color="error" 
+          variant="outlined" 
+          class="ml-md-4 mt-4 mt-md-0 d-flex align-center"
+          @click="deleteQuestion"
+          :loading="deleting"
+        >
+          <v-icon start>mdi-delete</v-icon> Delete
+        </v-btn>
       </div>
 
       <div class="d-flex align-center mb-6 py-3 border-y border-opacity-10">
@@ -23,9 +33,21 @@
         </div>
       </div>
 
-      <v-card-text class="pa-0 mb-6 text-body-1 opacity-90" style="line-height: 1.7; white-space: pre-wrap;">
+      <v-card class="bg-surface-light px-6 py-8 rounded-lg mb-8 text-body-1" elevation="0" style="font-size: 1.1rem; line-height: 1.8;">
         {{ question.description }}
-      </v-card-text>
+        
+        <div v-if="question.filePath" class="mt-6 border-t pt-4 border-opacity-10">
+          <v-btn 
+            :href="`http://localhost:3333/uploads/${question.filePath}`" 
+            target="_blank"
+            color="secondary" 
+            variant="tonal"
+            prepend-icon="mdi-download"
+          >
+            Download Attached Proof
+          </v-btn>
+        </div>
+      </v-card>
 
       <v-chip-group v-if="question.tags?.length" class="mt-4 px-0 pb-0">
         <v-chip
@@ -73,13 +95,24 @@
 
       <v-textarea
         v-model="answerText"
-        label="Write your answer..."
+        label="Your Answer"
         variant="outlined"
         color="primary"
         rows="6"
-        placeholder="Provide a detailed and helpful response..."
-        bg-color="rgba(0,0,0,0.1)"
-      />
+        placeholder="Write a clear, concise, and helpful answer..."
+        class="mb-4"
+      ></v-textarea>
+      
+      <v-file-input
+        label="Attach Proof (Optional)"
+        v-model="proof"
+        variant="outlined"
+        color="primary"
+        prepend-icon="mdi-paperclip"
+        class="mb-4"
+        show-size
+        accept=".jpg,.png,.pdf,.doc,.docx,.txt,.zip"
+      ></v-file-input>
 
       <div class="d-flex justify-end mt-4">
         <v-btn
@@ -99,14 +132,20 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import api from '../services/api'
 import AnswerCard from '../components/AnswerCard.vue'
 
 const route = useRoute()
+const router = useRouter()
 const question = ref(null)
 const answerText = ref('')
+const proof = ref(null)
 const loading = ref(false)
+const deleting = ref(false)
+
+const currentUserRole = ref('')
+const currentUserId = ref(null)
 
 const sortedAnswers = computed(() => {
   if (!question.value?.answers) return []
@@ -128,12 +167,20 @@ const submitAnswer = async () => {
   
   loading.value = true
   try {
-    await api.post('/api/answers', {
-      answerText: answerText.value,
-      questionId: Number(route.params.id),
+    const formData = new FormData()
+    formData.append('answerText', answerText.value)
+    formData.append('questionId', Number(route.params.id))
+    
+    if (proof.value && proof.value.length > 0) {
+      formData.append('proof', proof.value[0] || proof.value)
+    }
+
+    await api.post('/api/answers', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     })
 
     answerText.value = ''
+    proof.value = null
     fetchQuestion()
   } catch (err) {
     alert('Failed to post answer')
@@ -142,7 +189,31 @@ const submitAnswer = async () => {
   }
 }
 
-onMounted(fetchQuestion)
+const deleteQuestion = async () => {
+  if (!confirm('Are you sure you want to delete this question?')) return
+  
+  deleting.value = true
+  try {
+    await api.delete(`/api/questions/${question.value.id}`)
+    router.push('/questions')
+  } catch (e) {
+    alert('Failed to delete question')
+  } finally {
+    deleting.value = false
+  }
+}
+
+onMounted(() => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      currentUserRole.value = payload.role
+      currentUserId.value = payload.id
+    } catch(e) {}
+  }
+  fetchQuestion()
+})
 </script>
 
 <style scoped>

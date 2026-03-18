@@ -4,7 +4,7 @@
       <!-- Stats Column -->
       <v-col cols="12" sm="2" class="d-flex flex-sm-column justify-sm-start align-sm-end pr-sm-4 mb-2 mb-sm-0 text-sm-right text-caption text-medium-emphasis">
          <div class="mb-sm-2 mr-4 mr-sm-0">
-           <span class="font-weight-medium">0</span> votes
+           <span class="font-weight-medium">{{ totalScore }}</span> votes
          </div>
          <div :class="question.answers?.length > 0 ? 'text-success font-weight-medium border px-1 rounded' : ''" class="mr-4 mr-sm-0">
            <span class="font-weight-medium">{{ question.answers?.length || 0 }}</span> answers
@@ -36,15 +36,16 @@
           </v-chip-group>
           <div v-else></div>
 
-          <div class="text-caption d-flex align-center mt-2 mt-sm-0">
-             <v-avatar size="16" color="primary" class="mr-1">
-               <span class="text-white" style="font-size: 10px;">{{ question.user?.name?.charAt(0).toUpperCase() }}</span>
-             </v-avatar>
-             <router-link :to="`/users/${question.user?.id}`" class="text-primary text-decoration-none mr-1" @click.stop>
-               {{ question.user?.name }}
-             </router-link> 
-             <span class="text-medium-emphasis">asked on {{ new Date(question.createdAt).toLocaleDateString() }}</span>
-          </div>
+          <div class="align-self-end text-caption text-medium-emphasis mt-4 mt-sm-0 d-flex align-center">
+           <v-avatar color="primary" size="24" class="mr-2" v-if="question.user">
+             <span class="text-white text-caption">{{ question.user.name.charAt(0).toUpperCase() }}</span>
+           </v-avatar>
+           <router-link v-if="question.user" :to="`/users/${question.user.id}`" class="text-primary text-decoration-none mr-1" @click.stop>
+             {{ question.user.name }}
+           </router-link>
+           <span v-else class="text-medium-emphasis mr-1">Unknown User</span>
+           asked {{ new Date(question.createdAt).toLocaleDateString() }}
+         </div>
         </div>
       </v-col>
     </v-row>
@@ -53,12 +54,21 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 
 const props = defineProps({
-  question: Object,
+  question: {
+    type: Object,
+    required: true,
+  },
 })
 
 const router = useRouter()
+
+const totalScore = computed(() => {
+  if (!props.question || !props.question.answers) return 0;
+  return props.question.answers.reduce((sum, ans) => sum + (ans.score || 0), 0);
+})
 
 const goToDetail = () => {
   router.push(`/questions/${props.question.id}`)

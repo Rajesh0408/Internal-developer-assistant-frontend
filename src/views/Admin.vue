@@ -8,6 +8,28 @@
       </div>
     </div>
 
+    <!-- Global Stats -->
+    <v-row class="mb-4">
+      <v-col cols="12" sm="6">
+        <v-card class="pa-4 d-flex align-center justify-space-between" elevation="1">
+           <div>
+             <div class="text-subtitle-1 text-medium-emphasis">Total Questions</div>
+             <div class="text-h4 font-weight-bold text-primary">{{ globalStats.totalQuestions || 0 }}</div>
+           </div>
+           <v-icon size="48" color="primary" class="opacity-20">mdi-comment-question-outline</v-icon>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="6">
+        <v-card class="pa-4 d-flex align-center justify-space-between" elevation="1">
+           <div>
+             <div class="text-subtitle-1 text-medium-emphasis">Total Answers</div>
+             <div class="text-h4 font-weight-bold text-success">{{ globalStats.totalAnswers || 0 }}</div>
+           </div>
+           <v-icon size="48" color="success" class="opacity-20">mdi-comment-check-outline</v-icon>
+        </v-card>
+      </v-col>
+    </v-row>
+
     <v-row>
       <!-- Upload Document Section -->
       <v-col cols="12" md="5">
@@ -133,7 +155,8 @@
                     class="mr-4 mt-n2"
                     style="max-width: 150px"
                   ></v-select>
-                  <v-btn size="small" color="primary" @click="updateUserRole(user)" text>Update</v-btn>
+                  <v-btn size="small" color="primary" @click="updateUserRole(user)" text class="mr-2">Update</v-btn>
+                  <v-btn size="small" color="error" @click="deleteUser(user)" icon variant="text"><v-icon>mdi-delete</v-icon></v-btn>
                 </td>
               </tr>
             </tbody>
@@ -217,6 +240,7 @@ const newUser = ref({
 })
 
 const users = ref([])
+const globalStats = ref({ totalQuestions: 0, totalAnswers: 0 })
 const roleOptions = [
   'intern', 'junior_developer', 'developer', 
   'frontend_developer', 'backend_developer', 
@@ -247,6 +271,15 @@ const fetchDocuments = async () => {
   }
 }
 
+const fetchGlobalStats = async () => {
+  try {
+    const res = await api.get('/api/admin/stats')
+    globalStats.value = res.data
+  } catch (e) {
+    console.error('Failed to fetch global stats', e)
+  }
+}
+
 const fetchUsers = async () => {
   try {
     const res = await api.get('/api/users')
@@ -262,7 +295,19 @@ const updateUserRole = async (user) => {
     user.role = user._selectedRole
     alert('Role updated successfully')
   } catch (e) {
-    alert('Failed to update role: ' + (e.response?.data?.message || e.message))
+    console.error('Update Role Error:', e)
+    const backendMessage = e.response?.data?.errors?.[0]?.message || e.response?.data?.message
+    alert('Failed to update role: ' + (backendMessage || 'Network Error / Database Rejection'))
+  }
+}
+
+const deleteUser = async (user) => {
+  if (!confirm(`Are you sure you want to delete ${user.name}?`)) return
+  try {
+    await api.delete(`/api/users/${user.id}`)
+    fetchUsers()
+  } catch (e) {
+    alert('Failed to delete user: ' + (e.response?.data?.message || e.message))
   }
 }
 
@@ -328,6 +373,7 @@ const deleteDocument = async (id) => {
 
 onMounted(() => {
   checkAdmin()
+  fetchGlobalStats()
   fetchDocuments()
   fetchUsers()
 })

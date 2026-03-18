@@ -35,6 +35,26 @@
       </v-row>
     </v-card>
 
+    <!-- Searched Users -->
+    <v-card class="mb-8 pa-4 glass-card" elevation="0" v-if="searchedUsers.length > 0">
+      <h3 class="text-h6 font-weight-bold mb-4">Matched Users</h3>
+      <v-row>
+        <v-col v-for="user in searchedUsers" :key="user.id" cols="12" sm="6" md="4">
+          <v-card class="bg-surface-light px-4 py-3 rounded-lg d-flex align-center" elevation="0">
+            <v-avatar color="primary" class="mr-3 text-white font-weight-bold">
+              {{ user.name?.charAt(0).toUpperCase() }}
+            </v-avatar>
+            <div>
+              <router-link :to="`/users/${user.id}`" class="text-subtitle-1 font-weight-bold text-primary text-decoration-none d-block doc-item">
+                {{ user.name }}
+              </router-link>
+              <div class="text-caption text-medium-emphasis">{{ user.role.replace('_', ' ') }}</div>
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-card>
+
     <!-- Question List -->
     <v-row>
       <v-col
@@ -89,7 +109,17 @@
             placeholder="e.g. adonis, vue, authentication (comma separated)"
             hint="Tags help people find your question"
             persistent-hint
+            class="mb-4"
           />
+          <v-file-input
+            label="Attach Proof (Optional)"
+            v-model="proof"
+            variant="outlined"
+            color="primary"
+            prepend-icon="mdi-paperclip"
+            show-size
+            accept=".jpg,.png,.pdf,.doc,.docx,.txt,.zip"
+          ></v-file-input>
         </v-card-text>
 
         <v-divider class="opacity-20"></v-divider>
@@ -121,14 +151,17 @@ const route = useRoute()
 const title = ref('')
 const description = ref('')
 const tagsInput = ref('')
+const proof = ref(null)
 
 const searchKeyword = ref('')
+const searchedUsers = ref([])
 
 // Fetch all questions
 const fetchQuestions = async () => {
   try {
     const res = await api.get('/api/questions')
-    questions.value = res.data
+    questions.value = res.data.data || res.data
+    searchedUsers.value = []
   } catch (e) {
     console.error('Error fetching questions', e)
   }
@@ -145,7 +178,8 @@ const searchQuestions = async () => {
     const res = await api.get(
       `/api/questions/search?keyword=${searchKeyword.value}`
     )
-    questions.value = res.data
+    questions.value = res.data.questions?.data || res.data.questions || []
+    searchedUsers.value = res.data.users || []
   } catch {
     alert('Search failed')
   }
@@ -157,18 +191,32 @@ const createQuestion = async () => {
   
   loading.value = true
   try {
-    await api.post('/api/questions', {
-      title: title.value,
-      description: description.value,
-      tags: tagsInput.value
-        ? tagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '')
-        : [],
+    const formData = new FormData()
+    formData.append('title', title.value)
+    formData.append('description', description.value)
+    
+    if (tagsInput.value) {
+      const tags = tagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '')
+      for (const tag of tags) {
+        formData.append('tags[]', tag)
+      }
+    }
+
+    if (proof.value && proof.value.length > 0) {
+      formData.append('proof', proof.value[0] || proof.value)
+    }
+    
+    await api.post('/api/questions', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     })
 
     dialog.value = false
     title.value = ''
     description.value = ''
     tagsInput.value = ''
+    proof.value = null
 
     fetchQuestions()
   } catch {
@@ -179,7 +227,13 @@ const createQuestion = async () => {
 }
 
 onMounted(() => {
-  fetchQuestions()
+  if (route.query.keyword) {
+    searchKeyword.value = route.query.keyword
+    searchQuestions()
+  } else {
+    fetchQuestions()
+  }
+
   if (route.query.action === 'ask') {
     dialog.value = true
   }

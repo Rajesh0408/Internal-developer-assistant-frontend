@@ -18,11 +18,36 @@
 
       <!-- Answer Content -->
       <v-col class="pl-6 d-flex flex-column">
-        <div class="text-body-1 opacity-90 flex-grow-1" style="line-height: 1.6;">
+        <div class="text-body-1 mt-3 mb-4" style="line-height: 1.6;">
           {{ answer.answerText }}
         </div>
         
-        <div class="d-flex justify-end mt-4">
+        <div v-if="answer.filePath" class="mb-4">
+          <v-btn 
+            :href="`http://localhost:3333/uploads/${answer.filePath}`" 
+            target="_blank"
+            color="secondary" 
+            variant="tonal"
+            size="small"
+            prepend-icon="mdi-download"
+          >
+            Download Proof
+          </v-btn>
+        </div>
+        
+        <div class="d-flex justify-space-between align-end mt-4">
+          <v-btn 
+            v-if="currentUserRole === 'admin' || currentUserId === answer.userId"
+            color="error" 
+            variant="text" 
+            size="small"
+            @click="deleteAnswer"
+            class="px-2"
+          >
+            <v-icon start>mdi-delete</v-icon> Delete
+          </v-btn>
+          <div v-else></div>
+
           <v-card class="pa-3 rounded-lg user-badge bg-surface-light" flat elevation="0" max-width="250">
             <div class="text-caption text-medium-emphasis mb-1">Answered by</div>
             <div class="d-flex align-center">
@@ -42,7 +67,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import api from '../services/api'
 
 const props = defineProps({
@@ -69,6 +94,30 @@ const vote = async (type) => {
     alert('You already voted or something went wrong')
   }
 }
+
+const currentUserRole = ref('')
+const currentUserId = ref(null)
+
+const deleteAnswer = async () => {
+  if (!confirm('Are you sure you want to delete this answer?')) return
+  try {
+    await api.delete(`/api/answers/${props.answer.id}`)
+    emit('refresh')
+  } catch (e) {
+    alert('Failed to delete answer')
+  }
+}
+
+onMounted(() => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      currentUserRole.value = payload.role
+      currentUserId.value = payload.id
+    } catch(e) {}
+  }
+})
 </script>
 
 <style scoped>
