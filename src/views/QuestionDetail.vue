@@ -18,7 +18,7 @@
           <span class="font-weight-bold">{{ question.user?.name?.charAt(0).toUpperCase() }}</span>
         </v-avatar>
         <div>
-          <div class="text-subtitle-1 font-weight-bold">{{ question.user?.name }}</div>
+          <router-link :to="`/users/${question.user?.id}`" class="text-subtitle-1 font-weight-bold text-primary text-decoration-none">{{ question.user?.name }}</router-link>
           <div class="text-caption text-medium-emphasis">Asked a question</div>
         </div>
       </div>

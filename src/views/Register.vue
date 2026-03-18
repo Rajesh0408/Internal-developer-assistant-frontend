@@ -28,6 +28,15 @@
         ></v-text-field>
 
         <v-text-field
+          label="Phone Number (Optional)"
+          v-model="phoneNumber"
+          prepend-inner-icon="mdi-phone-outline"
+          variant="outlined"
+          color="primary"
+          class="mb-4"
+        ></v-text-field>
+
+        <v-text-field
           label="Password"
           type="password"
           v-model="password"
@@ -67,6 +76,7 @@ import { useRouter } from 'vue-router'
 
 const name = ref('')
 const email = ref('')
+const phoneNumber = ref('')
 const password = ref('')
 const loading = ref(false)
 const router = useRouter()
@@ -79,6 +89,7 @@ const register = async () => {
     await api.post('/auth/signup', {
       name: name.value,
       email: email.value,
+      phoneNumber: phoneNumber.value,
       password: password.value,
     })
 

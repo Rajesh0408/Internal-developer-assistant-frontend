@@ -30,7 +30,7 @@
                 <span class="font-weight-bold">{{ answer.user?.name?.charAt(0).toUpperCase() }}</span>
               </v-avatar>
               <div>
-                <div class="text-body-2 font-weight-bold">{{ answer.user?.name }}</div>
+                <router-link :to="`/users/${answer.user?.id}`" class="text-body-2 font-weight-bold text-primary text-decoration-none">{{ answer.user?.name }}</router-link>
                 <div class="text-caption text-primary">{{ answer.user?.role || 'Member' }}</div>
               </div>
             </div>

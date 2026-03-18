@@ -135,7 +135,7 @@ const totalQuestions = ref(0)
 const totalAnswers = ref(0)
 const notifications = ref([])
 
-const activeTab = ref('recent')
+const activeTab = ref('following')
 const feedQuestions = ref([])
 const loadingFeed = ref(false)
 const loadingMore = ref(false)

@@ -5,6 +5,7 @@ import Dashboard from '../views/Dashboard.vue'
 import Questions from '../views/Questions.vue'
 import QuestionDetail from '../views/QuestionDetail.vue'
 import Profile from '../views/Profile.vue'
+import UserProfile from '../views/UserProfile.vue'
 
 import Admin from '../views/Admin.vue'
 
@@ -18,6 +19,7 @@ const router = createRouter({
   { path: '/questions', component: Questions },
   { path: '/questions/:id', component: QuestionDetail },
   { path: '/profile', component: Profile },
+  { path: '/users/:id', component: UserProfile },
   { path: '/admin', component: Admin },
 ]
 })

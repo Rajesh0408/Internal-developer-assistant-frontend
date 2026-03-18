@@ -1,39 +1,53 @@
 <template>
-  <v-card class="glass-card pa-5 question-card mb-4" @click="goToDetail" elevation="0" style="cursor:pointer">
-    <div class="d-flex align-start justify-space-between mb-2">
-      <v-card-title class="text-h6 font-weight-bold pa-0" style="line-height: 1.3">
-        {{ question.title }}
-      </v-card-title>
-      <v-chip size="small" variant="tonal" color="primary" class="ml-4 font-weight-bold">
-        <v-icon start icon="mdi-comment-outline" size="small"></v-icon>
-        {{ question.answers?.length || 0 }} Answers
-      </v-chip>
-    </div>
+  <v-card class="glass-card pa-4 question-card mb-4" @click="goToDetail" elevation="0" style="cursor:pointer">
+    <v-row no-gutters>
+      <!-- Stats Column -->
+      <v-col cols="12" sm="2" class="d-flex flex-sm-column justify-sm-start align-sm-end pr-sm-4 mb-2 mb-sm-0 text-sm-right text-caption text-medium-emphasis">
+         <div class="mb-sm-2 mr-4 mr-sm-0">
+           <span class="font-weight-medium">0</span> votes
+         </div>
+         <div :class="question.answers?.length > 0 ? 'text-success font-weight-medium border px-1 rounded' : ''" class="mr-4 mr-sm-0">
+           <span class="font-weight-medium">{{ question.answers?.length || 0 }}</span> answers
+         </div>
+      </v-col>
 
-    <v-card-subtitle class="pa-0 mb-3 d-flex align-center text-medium-emphasis">
-      <v-avatar size="24" color="primary" variant="tonal" class="mr-2">
-        <span class="text-caption font-weight-bold">{{ question.user?.name?.charAt(0).toUpperCase() }}</span>
-      </v-avatar>
-      <span class="text-caption">Asked by <strong>{{ question.user?.name }}</strong></span>
-    </v-card-subtitle>
+      <!-- Content Column -->
+      <v-col cols="12" sm="10">
+        <h3 class="text-h6 font-weight-bold mb-1 text-primary" style="line-height: 1.3">
+          {{ question.title }}
+        </h3>
+        
+        <div class="text-body-2 opacity-80 mb-2 text-truncate" style="max-width: 100%;">
+          {{ question.description }}
+        </div>
 
-    <v-card-text class="pa-0 mb-4 text-body-1 opacity-80" style="line-height: 1.6">
-      {{ question.description.length > 150 ? question.description.slice(0, 150) + '...' : question.description }}
-    </v-card-text>
+        <div class="d-flex flex-wrap align-center justify-space-between mt-2">
+          <v-chip-group v-if="question.tags?.length" class="pa-0 ma-0">
+            <v-chip
+              v-for="tag in question.tags"
+              :key="tag"
+              color="secondary"
+              variant="tonal"
+              size="x-small"
+              class="mr-1 font-weight-medium"
+            >
+              {{ tag }}
+            </v-chip>
+          </v-chip-group>
+          <div v-else></div>
 
-    <v-chip-group v-if="question.tags?.length" class="mt-n2 px-0 pb-0">
-      <v-chip
-        v-for="tag in question.tags"
-        :key="tag"
-        color="secondary"
-        variant="outlined"
-        size="small"
-        class="mr-2 font-weight-medium"
-      >
-        <v-icon start icon="mdi-tag-outline" size="14"></v-icon>
-        {{ tag }}
-      </v-chip>
-    </v-chip-group>
+          <div class="text-caption d-flex align-center mt-2 mt-sm-0">
+             <v-avatar size="16" color="primary" class="mr-1">
+               <span class="text-white" style="font-size: 10px;">{{ question.user?.name?.charAt(0).toUpperCase() }}</span>
+             </v-avatar>
+             <router-link :to="`/users/${question.user?.id}`" class="text-primary text-decoration-none mr-1" @click.stop>
+               {{ question.user?.name }}
+             </router-link> 
+             <span class="text-medium-emphasis">asked on {{ new Date(question.createdAt).toLocaleDateString() }}</span>
+          </div>
+        </div>
+      </v-col>
+    </v-row>
   </v-card>
 </template>
 
