@@ -7,6 +7,7 @@ import QuestionDetail from '../views/QuestionDetail.vue'
 import Profile from '../views/Profile.vue'
 import UserProfile from '../views/UserProfile.vue'
 import Knowledge from '../views/Knowledge.vue'
+import Chat from '../views/Chat.vue'
 
 import Admin from '../views/Admin.vue'
 
@@ -21,6 +22,7 @@ const router = createRouter({
   { path: '/questions/:id', component: QuestionDetail },
   { path: '/knowledge', component: Knowledge },
   { path: '/profile', component: Profile },
+  { path: '/chat', component: Chat },
   { path: '/users/:id', component: UserProfile },
   { path: '/admin', component: Admin },
 ]
